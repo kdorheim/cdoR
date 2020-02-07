@@ -34,7 +34,7 @@ check_cmip_info <- function(dt){
 check_12_months <- function(dt){
 
   # Check the data frame column names,
-  required <- c('year', 'month', 'value', cmip6_info)
+  required <- c('year', 'month', 'value', cdoR::cmip6_info)
   assertthat::assert_that(all(required %in% names(dt)), msg = 'Missing required column names.')
   assertthat::assert_that(check_cmip_info(dt), msg = 'Trying to process data from muliple MIP sources.')
   assertthat::assert_that(data.table::is.data.table(dt), msg = 'dt must be a data.table object.')
