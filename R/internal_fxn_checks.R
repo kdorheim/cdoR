@@ -16,7 +16,7 @@
 #' @return A true or false if the conditions are met.
 #' @import data.table
 check_cmip_info <- function(dt){
-  assertthat::assert_that(is.data.table(dt), msg = 'dt must be a data.table object.')
+  assertthat::assert_that(data.table::is.data.table(dt), msg = 'dt must be a data.table object.')
   info <- unique(dt[ , .(variable, domain, model, experiment, ensemble, grid) ])
   nrow(info) == 1
 }
