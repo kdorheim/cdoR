@@ -14,10 +14,9 @@
 #'
 #' @param dt A drame.table object containg CMIP information.
 #' @return A true or false if the conditions are met.
-#' @import data.table
 check_cmip_info <- function(dt){
   assertthat::assert_that(data.table::is.data.table(dt), msg = 'dt must be a data.table object.')
-  info <- unique(dt[ , .(variable, domain, model, experiment, ensemble, grid) ])
+  info <- unique(dt[ , .(variable, domain, model, experiment, ensemble, grid)])
   nrow(info) == 1
 }
 
@@ -30,7 +29,6 @@ check_cmip_info <- function(dt){
 #' @param dt A drame.table object containg CMIP information for a time series of monthly data.
 #' @return A data frame of monthly data with the problem column indicating if there is an issue with the number of
 #' months in the time series.
-#' @import data.table
 check_12_months <- function(dt){
 
   # Check the data frame column names,
@@ -39,7 +37,7 @@ check_12_months <- function(dt){
   assertthat::assert_that(check_cmip_info(dt), msg = 'Trying to process data from muliple MIP sources.')
   assertthat::assert_that(data.table::is.data.table(dt), msg = 'dt must be a data.table object.')
 
-  month_N <- dt[, .N, by = .(year, variable, domain, model, experiment, ensemble, grid)]
+  month_N <- dt[, .N, by = list(year, variable, domain, model, experiment, ensemble, grid)]
 
   if(all(month_N[ , N == 12])){
 
@@ -66,7 +64,6 @@ check_12_months <- function(dt){
 #' @param dt A drame.table object containg CMIP information for a time series of annual data.
 #' @return A data frame of monthly data with the problem column indicating if there is an issue with the number of
 #' months in the time series.
-#' @import data.table
 check_annual_dupplicates <- function(dt){
 
   # Check the data frame column names,
@@ -74,7 +71,7 @@ check_annual_dupplicates <- function(dt){
   assertthat::assert_that(all(required %in% names(dt)), msg = 'Missing required column names.')
   assertthat::assert_that(check_cmip_info(dt), msg = 'Trying to process data from muliple MIP sources.')
 
-  year_N <- dt[, .N, by = .(year, variable, domain, model, experiment, ensemble, grid)]
+  year_N <- dt[, .N, by = list(year, variable, domain, model, experiment, ensemble, grid)]
 
   if(all(year_N[ , N == 1])){
 

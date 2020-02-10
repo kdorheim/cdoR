@@ -58,7 +58,7 @@ format_time <- function(nc){
 #' @param dt the input data.table object that contains cmip data and files to process.
 #' @param not_required a vector of the CMIP infor that is not required
 #' @return A data.table of the relvant experiment / model / ect. information.
-#' @import data.table
+#' @importFrom data.table data.table
 parse_cmip_info <- function(dt, not_required = NA){
 
   # Make sure that all of the cmip information is being parsed out of the data frame

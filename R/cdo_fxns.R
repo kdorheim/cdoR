@@ -10,7 +10,7 @@
 #'
 #' @param  dt the input data.table object that contains cmip data and files to process
 #' @return The path to the netcdf of the concatenated ncdf.
-cdo_concate<- function(dt, intermed_dir){
+cdo_concate <- function(dt, intermed_dir){
 
   cmip_info <- parse_cmip_info(dt)
   name      <- paste(cmip_info, collapse = '_')

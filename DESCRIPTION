@@ -10,3 +10,6 @@ LazyData: TRUE
 Suggests: 
     testthat (>= 1.4.0)
 RoxygenNote: 7.0.2
+Depends: 
+  data.table(>= 1.12.8)
+
