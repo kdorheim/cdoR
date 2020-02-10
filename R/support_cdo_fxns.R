@@ -63,7 +63,8 @@ parse_cmip_info <- function(dt, not_required = NA){
   # Make sure that all of the cmip information is being parsed out of the data frame
   # and returned as a data frame.
   required <- cdoR::cmip6_info[which(!cdoR::cmip6_info %in% not_required)]
-  assertthat::assert_that(is.data.table(dt) & all(required %in% names(dt)))
+  assertthat::assert_that(data.table::is.data.table(dt))
+  assertthat::assert_that(all(required %in% names(dt)))
 
   # Select the columns that contain cmip information.
   cols <- which(names(dt) %in% cdoR::cmip6_info)
