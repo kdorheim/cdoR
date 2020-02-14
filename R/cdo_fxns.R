@@ -8,7 +8,7 @@
 #' thing good to do using cdo instead of R because sometimes the netcdf files will repeate
 #' years / months in the different netcdf files and CDO can take care of that with the operator copy.
 #'
-#' @param  dt the input data.table object that contains cmip data and files to process
+#' @param  dt the input tibble object that contains cmip data and files to process
 #' @return The path to the netcdf of the concatenated ncdf.
 cdo_concate <- function(dt, intermed_dir){
 
@@ -20,7 +20,7 @@ cdo_concate <- function(dt, intermed_dir){
   system2(cdoR::cdo_exe, args = c('cat', dt[['file']], nc_out), stdout = TRUE, stderr = TRUE)
 
   assertthat::assert_that(file.exists(nc_out))
-  as.string(nc_out)
+  nc_out
 }
 
 
@@ -30,7 +30,7 @@ cdo_concate <- function(dt, intermed_dir){
 #' and gird cell area files. The netcdf returned by this function can be used as a land
 #' area weight when taking the weighted mean.
 #'
-#' @param  dt a wide data.table of area and land fraction data to process.
+#' @param  dt a wide tibble of area and land fraction data to process.
 #' @return The path to the netcdf of the land area.
 cdo_land_area <- function(dt, intermed_dir){
 
@@ -45,7 +45,7 @@ cdo_land_area <- function(dt, intermed_dir){
   system2(cdoR::cdo_exe, args = c("-mul", dt[['areacella']], PercentLand_nc, LandArea_nc), stdout = TRUE, stderr = TRUE)
 
   assertthat::assert_that(file.exists(LandArea_nc))
-  as.character(LandArea_nc)
+  LandArea_nc
 
 }
 
@@ -56,7 +56,7 @@ cdo_land_area <- function(dt, intermed_dir){
 #' and gird cell area files. The netcdf returned by this function can be used as a
 #' area weights to calcualte the mean weighted value over the oceans.
 #'
-#' @param  dt a wide data.table of area and land fraction data to process.
+#' @param  dt a wide tibble of area and land fraction data to process.
 #' @return The path to the netcdf of the ocean area.
 cdo_ocean_area <- function(dt, intermed_dir){
 
@@ -71,7 +71,7 @@ cdo_ocean_area <- function(dt, intermed_dir){
   system2(cdoR::cdo_exe, args = c("-mul", dt[['areacella']], PercentOcean_nc, OceanArea_nc), stdout = TRUE, stderr = TRUE)
 
   assertthat::assert_that(file.exists(OceanArea_nc))
-  as.character(OceanArea_nc)
+ OceanArea_nc
 
 }
 
