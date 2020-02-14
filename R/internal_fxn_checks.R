@@ -18,7 +18,7 @@ check_cmip_info <- function(dt){
   assertthat::assert_that(tibble::is_tibble(dt), msg = 'dt must be a tibble object.')
   dt %>%
     dplyr::select(variable, domain, model, experiment, ensemble, grid) %>%
-    dplyr::distinct() ->
+    dplyr::distinct(.) ->
     info
   nrow(info) == 1
 }
