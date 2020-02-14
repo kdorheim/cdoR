@@ -14,13 +14,13 @@ cdo_concate <- function(dt, intermed_dir){
 
   cmip_info <- parse_cmip_info(dt)
   name      <- paste(cmip_info, collapse = '_')
-  nc_out    <- file.path(intermed_dir, paste0(name, '-AbsConcat.nc'))
-  file.remove(nc_out)
+  nc_out    <- file.path(intermed_dir, paste0(name, '-Concat.nc'))
+  if(file.exists(nc_out)) {file.remove(nc_out)}
 
-  system2(cdoR::cdo_exe, args = c('copy', dt[['file']], nc_out), stdout = TRUE, stderr = TRUE)
+  system2(cdoR::cdo_exe, args = c('cat', dt[['file']], nc_out), stdout = TRUE, stderr = TRUE)
 
   assertthat::assert_that(file.exists(nc_out))
-  nc_out
+  as.string(nc_out)
 }
 
 
@@ -45,7 +45,7 @@ cdo_land_area <- function(dt, intermed_dir){
   system2(cdoR::cdo_exe, args = c("-mul", dt[['areacella']], PercentLand_nc, LandArea_nc), stdout = TRUE, stderr = TRUE)
 
   assertthat::assert_that(file.exists(LandArea_nc))
-  LandArea_nc
+  as.character(LandArea_nc)
 
 }
 
@@ -71,7 +71,7 @@ cdo_ocean_area <- function(dt, intermed_dir){
   system2(cdoR::cdo_exe, args = c("-mul", dt[['areacella']], PercentOcean_nc, OceanArea_nc), stdout = TRUE, stderr = TRUE)
 
   assertthat::assert_that(file.exists(OceanArea_nc))
-  OceanArea_nc
+  as.character(OceanArea_nc)
 
 }
 
@@ -86,26 +86,19 @@ cdo_ocean_area <- function(dt, intermed_dir){
 #' @param area_nc the path for the area netcdf file that will be used as the area weights.
 #' @param intermed_dir the path of the directory where all of the intermediate netcdf
 #' files will be saved to.
-#' @return The path of the netcdf of the area weighted file.
+#' @return A data.table of the weighted fldmean result
 cdo_fldmean_area <- function(name, in_nc, area_nc, intermed_dir){
 
-  assertthat::assert_that(file.exists(in_nc))
-
+  assertthat::assert_that(file.exists(area_nc))
+  assertthat::assert_that(dir.exists(intermed_dir))
   areadata_nc <- file.path(intermed_dir, paste0(name, '-AreaData.nc'))
   out_nc      <- file.path(intermed_dir, paste0(name, '-fldmean.nc'))
+  if(file.exists(areadata_nc)) file.remove(areadata_nc)
+  if(file.exists(out_nc)) file.remove(out_nc)
 
   system2(cdoR::cdo_exe, args = c(paste0("setgridarea,", area_nc), in_nc, areadata_nc), stdout = TRUE, stderr = TRUE)
-  system2(cdoR::cdo_exe, args = c('fldmean', areadata_nc, out_nc), stdout = TRUE, stderr = TRUE )
+  system2(cdoR::cdo_exe, args = c('fldmean,weights=TRUE', paste0("-setgridarea,", area_nc), in_nc, out_nc), stdout = TRUE, stderr = TRUE)
 
   assertthat::assert_that(file.exists(out_nc))
   out_nc
-
 }
-
-
-
-
-
-
-
-
