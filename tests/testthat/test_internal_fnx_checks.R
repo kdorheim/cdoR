@@ -6,7 +6,7 @@ context('Test internal fucntion checks.')
 
 testthat::test_that('check_cmip_info', {
 
-  data <- data.table::data.table(year = rep(1990:1994),
+  data <- tibble::tibble(year = rep(1990:1994),
                                          value = NA,
                                          variable = 'tas',
                                          domain = 'Amon',
@@ -16,7 +16,7 @@ testthat::test_that('check_cmip_info', {
                                          grid = 'gn')
 
   # Check to see if it throws an error.
-  testthat::expect_error(check_cmip_info(as.data.frame(data)), 'dt must be a data.table object.')
+  testthat::expect_error(check_cmip_info(as.data.frame(data)), 'dt must be a tibble object.')
 
 
   # When only one kind of CMIP data is read the function
@@ -32,7 +32,7 @@ testthat::test_that('check_cmip_info', {
 testthat::test_that('check_12_months', {
 
   # Quickly make some example monthly data.
-  monthly_data <- data.table::data.table(year = rep(1990:1994, each = 12),
+  monthly_data <- tibble::tibble(year = rep(1990:1994, each = 12),
                                          month = rep(1:12, length(1990:1994)),
                                          value = NA,
                                          variable = 'tas',
@@ -47,7 +47,7 @@ testthat::test_that('check_12_months', {
   testthat::expect_error(check_12_months(monthly_data[, 1:5]), 'Missing required column names.')
 
   # Make sure that it reurns expected problem codes.
-  out <- check_12_months(monthly_data)
+  out <- check_12_months(dt = monthly_data)
   testthat::expect_equal(unique(out$problem), 0)
 
   # What problem code should be returned if there is an issue with the number of months in a year?
@@ -59,7 +59,7 @@ testthat::test_that('check_12_months', {
   testthat::expect_equal(unique(out$problem), code)
 
   # If a month is missing.
-  missing_month <- monthly_data[month != 12 & year == 1994]
+  missing_month <- monthly_data[monthly_data$month != 12 & monthly_data$year == 1994, ]
   out           <- check_12_months(missing_month)
   testthat::expect_equal(unique(out$problem), code)
 
@@ -67,7 +67,7 @@ testthat::test_that('check_12_months', {
 
 # Quickly make some example annual data, this data will be used
 # by multiple tests.
-annual_data <- data.table::data.table(year = 1990:1994,
+annual_data <- tibble::tibble(year = 1990:1994,
                                       value = NA,
                                       variable = 'tas',
                                       domain = 'Amon',
@@ -84,7 +84,7 @@ testthat::test_that('check_annual_dupplicates', {
 
   duplicate_years <- rbind(annual_data, annual_data)
   out             <- check_annual_dupplicates(duplicate_years)
-  code            <- problem_codes[fxn == 'check_annual_dupplicates']$problem
+  code            <- problem_codes[problem_codes$fxn == 'check_annual_dupplicates', ]$problem
   testthat::expect_equal(unique(out$problem), code)
 
   # Make sure that the function throws error messages.
@@ -92,17 +92,16 @@ testthat::test_that('check_annual_dupplicates', {
   annual_data$model <- c(rep('package', 4), 'bad')
   testthat::expect_error(check_annual_dupplicates(annual_data), 'Trying to process data from muliple MIP sources.')
 
-
 })
 
 testthat::test_that('check_annual_continuous', {
 
-  out <- check_annual_continuous(annual_data)
+  out <- check_annual_continuous(dt = annual_data)
   testthat::expect_true(unique(out$problem) == 0)
 
- missing_data <- annual_data[year != 1993]
+ missing_data <- annual_data[annual_data$year != 1993, ]
  out          <- check_annual_continuous(missing_data)
- epected_code <- problem_codes[fxn == 'check_annual_continuous', ]$problem
+ epected_code <- problem_codes[problem_codes$fxn == 'check_annual_continuous', ]$problem
  testthat::expect_true(unique(out$problem) == epected_code)
 
 })
