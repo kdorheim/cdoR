@@ -42,7 +42,7 @@ check_12_months <- function(dt){
 
   dt %>%
     dplyr::group_by(year, variable, domain, model, experiment, ensemble, grid) %>%
-    dplyr::summarise(N = n()) %>%
+    dplyr::summarise(N = dplyr::n()) %>%
     dplyr::ungroup() ->
     month_N
 
@@ -80,7 +80,7 @@ check_annual_dupplicates <- function(dt){
 
   dt %>%
     dplyr::group_by(year, variable, domain, model, experiment, ensemble, grid) %>%
-    dplyr::summarise(N = n()) %>%
+    dplyr::summarise(N = dplyr::n()) %>%
     dplyr::ungroup() ->
     year_N
 
