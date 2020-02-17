@@ -88,7 +88,11 @@ cdo_ocean_area <- function(dt, intermed_dir){
 #' files will be saved to.
 #' @return A data.table of the weighted fldmean result
 cdo_fldmean_area <- function(name, in_nc, area_nc, intermed_dir){
-
+  # TODO there is some problem wtih the cmip6 and cdo compatbility
+  # the commands that worked on cmip5 netcdfs are no longer work. This
+  # is puzzeling and I wonder if using the copy function could some how
+  # overwrite whatever projections were there.
+  stop()
   assertthat::assert_that(file.exists(area_nc))
   assertthat::assert_that(dir.exists(intermed_dir))
   areadata_nc <- file.path(intermed_dir, paste0(name, '-AreaData.nc'))
@@ -101,4 +105,35 @@ cdo_fldmean_area <- function(name, in_nc, area_nc, intermed_dir){
 
   assertthat::assert_that(file.exists(out_nc))
   out_nc
+}
+
+#' Calculate the area weighted field mean without using cdo.
+#'
+#' \code{fldmean_area} Calculate the area weighted field mean for some varaible, without using
+#' cdo operators. It looks like there might be some issues with how the cdo code is working
+#' with the cmip6 netcdfs, untill those issuse are resolved the workaround will be to use
+#' R to do the area weighting average.
+#'
+#' @param info The dataframe of CMIP information such as variable / ensemble / domain / ect.
+#' @param in_nc the path for the input netcdf file that is going to be procssed.
+#' @param area_nc the path for the area netcdf file that will be used as the area weights.
+#' @return A tibble of the area weighted mean.
+fldmean_area <- function(info, in_nc, area_nc){
+
+  assertthat::assert_that(file.exists(area_nc))
+  assertthat::assert_that(file.exists(in_nc))
+
+  nc <- ncdf4::nc_open(in_nc)
+  time <- format_time(nc)
+  data <- ncdf4::ncvar_get(nc, info$variable)
+
+  area <- ncdf4::ncvar_get(ncdf4::nc_open(area_nc), 'areacella')
+
+  mean <- apply(data, 3, weighted.mean, w = area)
+
+  cbind(time,
+        value = mean,
+        units = ncdf4::ncatt_get(nc, info$variable)$unit,
+        info)
+
 }
