@@ -43,7 +43,7 @@ format_time <- function(nc){
   time <- lubridate::as_date(ncvar_get(nc, 'time'), origin = time_units)
 
   # Return the data frame.
-  data.table(datetime = time,
+  tibble::tibble(datetime = time,
              year = lubridate::year(time),
              month = lubridate::month(time))
 
@@ -55,7 +55,7 @@ format_time <- function(nc){
 #' \code{parse_cmip_info} Extract the CMIP experiment / model / ensemble / ect. information from a
 #' data frame of information to process. This function should work with both CMIP5 and CMIP6 data.
 #'
-#' @param dt the input data.table object that contains cmip data and files to process.
+#' @param dt a tibble that contains columns of information in addition to other columns, no
 #' @param not_required a vector of the CMIP infor that is not required
 #' @return A data.table of the relvant experiment / model / ect. information.
 #' @importFrom data.table data.table
@@ -64,23 +64,23 @@ parse_cmip_info <- function(dt, not_required = NA){
   # Make sure that all of the cmip information is being parsed out of the data frame
   # and returned as a data frame.
   required <- cdoR::cmip6_info[which(!cdoR::cmip6_info %in% not_required)]
-  assertthat::assert_that(data.table::is.data.table(dt))
+  assertthat::assert_that(tibble::is_tibble(dt))
   assertthat::assert_that(all(required %in% names(dt)))
 
   # Select the columns that contain cmip information.
-  cols <- which(names(dt) %in% cdoR::cmip6_info)
-  out  <- unique.data.frame(dt[ , ..cols])
+  cols <- which(names(dt) %in% required)
+  out  <- unique.data.frame(dt[ , cols])
 
   # Make sure that the object that is going to be returned is a data frame
   # that only has one entry.
-  assertthat::assert_that(nrow(out) == 1 & is.data.frame(out))
+  assertthat::assert_that(nrow(out) == 1 & tibble::is_tibble(out))
 
   # If there is no grid information it means we are processing cmip5 data
   # and drop the grid column, it will only be confuse the intermediate
   # output file nomencalture.
   if(all(is.na(out$grid))) {
     col <-  which(names(out)  == 'grid')
-    out <-  out[ ,-..col]
+    out <-  out[ ,-col]
   }
 
   out

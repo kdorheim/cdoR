@@ -105,3 +105,20 @@ testthat::test_that('check_annual_continuous', {
  testthat::expect_true(unique(out$problem) == epected_code)
 
 })
+
+
+testthat::test_that('parse_cmip_info', {
+
+  # Check the strucutre and contents of the outputs, does this function
+  # handel expcptions to the not required feature?
+  out <- parse_cmip_info(annual_data)
+  testthat::expect_equal(nrow(out), 1)
+
+  out_missing_domain <- parse_cmip_info(annual_data, not_required = 'domain')
+  testthat::expect_equal(ncol(out) - 1, ncol(out_missing_domain))
+  testthat::expect_true(!'domain' %in% names(out_missing_domain))
+
+  #TODO test / devlop the capabilities so that this function works with
+  # CMIP5 info.
+
+})
