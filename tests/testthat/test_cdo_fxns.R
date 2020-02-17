@@ -4,7 +4,7 @@ context('Test cdo functions.')
 test_dir <- getwd()
 
 # Create a fake cmip data frame for the test data.
-dt <- data.table::data.table(file = c(file.path(test_dir, "data/areacella_fx_CNRM-CM6-1_historical_r10i1p1f2_gr.nc"),
+dt <- tibble::tibble(file = c(file.path(test_dir, "data/areacella_fx_CNRM-CM6-1_historical_r10i1p1f2_gr.nc"),
                                       file.path(test_dir, "data/sftlf_fx_CNRM-CM6-1_historical_r10i1p1f2_gr.nc"),
                                       file.path(test_dir, "data/tas_Amon_CNRM-CM6-1_historical_r10i1p1f2_gr_185001-201412.nc")),
                              variable = c('areacella', 'sftlf', 'tas'),
@@ -16,9 +16,10 @@ dt <- data.table::data.table(file = c(file.path(test_dir, "data/areacella_fx_CNR
 
 
 # Format the input data for the cdo land and ocean area weights.
-area_in <- dcast(dt, domain + model + experiment + ensemble + grid ~ variable, value.var = 'file')
-tas_nc <- dt[variable == 'tas']$file
-dt_tas <- dt[variable == 'tas']
+#area_in <- dcast(dt, domain + model + experiment + ensemble + grid ~ variable, value.var = 'file')
+area_in <- tidyr::spread(dt, variable, file)
+tas_nc <- dt$file[dt$variable == 'tas']
+dt_tas <- dt[dt$variable == 'tas']
 
 land_area <- cdo_land_area(dt = area_in, intermed_dir = test_dir)
 ocean_area <- cdo_ocean_area(area_in, test_dir)

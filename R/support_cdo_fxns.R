@@ -17,8 +17,8 @@ extract_mean_results <- function(out_nc, info){
   # TODO this modify this section to make it easier to extract
   # data that has a depth to it (such as co2).
   cbind(time,
-        value = ncvar_get(nc, info$variable),
-        units = ncatt_get(nc, info$variable)$unit,
+        value = ncdf4::ncvar_get(nc, info$variable),
+        units = ncdf4::ncatt_get(nc, info$variable)$unit,
         info)
 
 }
@@ -36,11 +36,9 @@ format_time <- function(nc){
   assertthat::assert_that(class(nc) == "ncdf4")
 
   # Extract the time and time unit information.
-  time_units <- ncatt_get(nc, 'time')$units
-  print(time_units)
+  time_units <- ncdf4::ncatt_get(nc, 'time')$units
   time_units <- gsub(pattern = 'days since ', replacement = '', time_units)
-  print(time_units)
-  time <- lubridate::as_date(ncvar_get(nc, 'time'), origin = time_units)
+  time <- lubridate::as_date(ncdf4::ncvar_get(nc, 'time'), origin = time_units)
 
   # Return the data frame.
   tibble::tibble(datetime = time,
@@ -64,8 +62,8 @@ parse_cmip_info <- function(dt, not_required = NA){
   # Make sure that all of the cmip information is being parsed out of the data frame
   # and returned as a data frame.
   required <- cdoR::cmip6_info[which(!cdoR::cmip6_info %in% not_required)]
-  assertthat::assert_that(tibble::is_tibble(dt))
   assertthat::assert_that(all(required %in% names(dt)))
+  assertthat::assert_that(is.data.frame(dt))
 
   # Select the columns that contain cmip information.
   cols <- which(names(dt) %in% required)
@@ -73,7 +71,7 @@ parse_cmip_info <- function(dt, not_required = NA){
 
   # Make sure that the object that is going to be returned is a data frame
   # that only has one entry.
-  assertthat::assert_that(nrow(out) == 1 & tibble::is_tibble(out))
+  assertthat::assert_that(nrow(out) == 1)
 
   # If there is no grid information it means we are processing cmip5 data
   # and drop the grid column, it will only be confuse the intermediate

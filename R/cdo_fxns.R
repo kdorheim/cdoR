@@ -97,7 +97,7 @@ cdo_fldmean_area <- function(name, in_nc, area_nc, intermed_dir){
   if(file.exists(out_nc)) file.remove(out_nc)
 
   system2(cdoR::cdo_exe, args = c(paste0("setgridarea,", area_nc), in_nc, areadata_nc), stdout = TRUE, stderr = TRUE)
-  system2(cdoR::cdo_exe, args = c('fldmean,weights=TRUE', paste0("-setgridarea,", area_nc), in_nc, out_nc), stdout = TRUE, stderr = TRUE)
+  system2(cdoR::cdo_exe, args = c('fldmean,weights=TRUE', areadata_nc, out_nc), stdout = TRUE, stderr = TRUE)
 
   assertthat::assert_that(file.exists(out_nc))
   out_nc
