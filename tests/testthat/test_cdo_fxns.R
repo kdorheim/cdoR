@@ -1,7 +1,7 @@
 context('Test cdo functions.')
 
 # Only test the cdo functions if the correct environment is set up for it.
-if(dir.exists(cdoR::cdo_exe)){
+if(file.exists(cdoR::cdo_exe)){
 
   # Define the directory to write out all of the intermediate netcdf files to.
   test_dir <- getwd()
