@@ -7,6 +7,8 @@ if(file.exists(cdoR::cdo_exe)){
   test_dir <- getwd()
 
   # Create a fake cmip data frame for the test data.
+  # TODO figure out if the testing netcdfs should be commited to git, if they are too pic should the comparison
+  # data be pulled from the cmip6 archive??
   dt <- tibble::tibble(file = c(file.path(test_dir, "data/areacella_fx_CNRM-CM6-1_historical_r10i1p1f2_gr.nc"),
                                 file.path(test_dir, "data/sftlf_fx_CNRM-CM6-1_historical_r10i1p1f2_gr.nc"),
                                 file.path(test_dir, "data/tas_Amon_CNRM-CM6-1_historical_r10i1p1f2_gr_185001-201412.nc")),
@@ -24,6 +26,8 @@ if(file.exists(cdoR::cdo_exe)){
   tas_nc <- dt[dt$variable == 'tas', ][['file']]
   dt_tas <- dt[dt$variable == 'tas', ]
   info   <- parse_cmip_info(dt_tas)
+  name   <- paste(info, collapse = '_')
+
 
   land_area <- cdo_land_area(dt = area_in, intermed_dir = test_dir)
   ocean_area <- cdo_ocean_area(area_in, test_dir)
@@ -54,15 +58,28 @@ if(file.exists(cdoR::cdo_exe)){
     testthat::expect_true(file.exists(cat_tas))
   })
 
+  annual_nc <- cdo_yearmonmean(name = name, in_nc = tas_nc, intermed_dir = test_dir)
+
+  testthat::test_that('cdo_yearmonmean runs',{
+    monthly <- ncdf4::ncvar_get( ncdf4::nc_open(tas_nc), 'tas')
+    annual <- ncdf4::ncvar_get( ncdf4::nc_open(annual_nc), 'tas')
+
+    monthly_temporal_dim <- dim(monthly)[3]
+    annual_temporal_dim  <- dim(annual)[3]
+
+    testthat::expect_equal(monthly_temporal_dim/12, annual_temporal_dim)
+
+  })
+
 
   testthat::test_that('fldmean works', {
 
     # Calculate the weighted means with the different area weights, then compare temperature.
     ## TODO we are currently using an R based function which is going to be slow, but we should
     ## be able to make it work.
-    land_mean   <- fldmean_area(info = info, in_nc = tas_nc, area_nc = land_area)
-    ocean_mean  <- fldmean_area(info = info, in_nc = tas_nc, area_nc = ocean_area)
-    global_mean <- fldmean_area(info = info, in_nc = tas_nc, area_nc = area_in[['areacella']])
+    land_mean   <- fldmean_area(info = info, in_nc = annual_nc, area_nc = land_area)
+    ocean_mean  <- fldmean_area(info = info, in_nc = annual_nc, area_nc = ocean_area)
+    global_mean <- fldmean_area(info = info, in_nc = annual_nc, area_nc = area_in[['areacella']])
 
     # The ocean, land, and global mean temperature should be different from one another.
     testthat::expect_true(mean((land_mean$value - ocean_mean$value)^2) > 0)

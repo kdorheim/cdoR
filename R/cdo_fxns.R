@@ -107,6 +107,20 @@ cdo_fldmean_area <- function(name, in_nc, area_nc, intermed_dir){
   out_nc
 }
 
+
+cdo_yearmonmean <- function(name, in_nc, intermed_dir){
+
+  assertthat::assert_that(file.exists(in_nc))
+  assertthat::assert_that(dir.exists(intermed_dir))
+  out_nc      <- file.path(intermed_dir, paste0(name, '-yearmonmean.nc'))
+  if(file.exists(out_nc)) file.remove(out_nc)
+
+  system2(cdoR::cdo_exe, args = c('yearmonmean', in_nc, out_nc), stdout = TRUE, stderr = TRUE)
+
+  assertthat::assert_that(file.exists(out_nc))
+  out_nc
+}
+
 #' Calculate the area weighted field mean without using cdo.
 #'
 #' \code{fldmean_area} Calculate the area weighted field mean for some varaible, without using
