@@ -7,7 +7,7 @@
 cdo_concate(dt, intermed_dir)
 }
 \arguments{
-\item{dt}{the input data.table object that contains cmip data and files to process}
+\item{dt}{the input tibble object that contains cmip data and files to process}
 }
 \value{
 The path to the netcdf of the concatenated ncdf.

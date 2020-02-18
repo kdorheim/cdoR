@@ -7,7 +7,7 @@
 check_annual_dupplicates(dt)
 }
 \arguments{
-\item{dt}{A drame.table object containg CMIP information for a time series of annual data.}
+\item{dt}{A tibble object containg CMIP information for a time series of annual data.}
 }
 \value{
 A data frame of monthly data with the problem column indicating if there is an issue with the number of

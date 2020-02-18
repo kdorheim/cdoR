@@ -7,7 +7,7 @@
 parse_cmip_info(dt, not_required = NA)
 }
 \arguments{
-\item{dt}{the input data.table object that contains cmip data and files to process.}
+\item{dt}{a tibble that contains columns of information in addition to other columns, no}
 
 \item{not_required}{a vector of the CMIP infor that is not required}
 }

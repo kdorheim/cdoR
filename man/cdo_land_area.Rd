@@ -7,7 +7,7 @@
 cdo_land_area(dt, intermed_dir)
 }
 \arguments{
-\item{dt}{a wide data.table of area and land fraction data to process.}
+\item{dt}{a wide tibble of area and land fraction data to process.}
 }
 \value{
 The path to the netcdf of the land area.

@@ -7,12 +7,12 @@
 check_cmip_info(dt)
 }
 \arguments{
-\item{dt}{A drame.table object containg CMIP information.}
+\item{dt}{A tibble object containg CMIP information.}
 }
 \value{
 A true or false if the conditions are met.
 }
 \description{
-\code{check_cmip_info} Check to make sure that there is only data for a sinlge model / variable / experiment and '
-in a data.table of cmip data.
+\code{check_cmip_info} Check to make sure that there is only data for a sinlge model / variable /
+experiment and in a tibble of cmip data.
 }

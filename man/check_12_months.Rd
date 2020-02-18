@@ -7,7 +7,7 @@
 check_12_months(dt)
 }
 \arguments{
-\item{dt}{A drame.table object containg CMIP information for a time series of monthly data.}
+\item{dt}{A tibble containg CMIP information for a time series of monthly data.}
 }
 \value{
 A data frame of monthly data with the problem column indicating if there is an issue with the number of

@@ -18,7 +18,7 @@ be used to label the intermediate netcdf files.}
 files will be saved to.}
 }
 \value{
-The path of the netcdf of the area weighted file.
+A data.table of the weighted fldmean result
 }
 \description{
 \code{cdo_fldmean_area} Calculate the area weighted field mean for some varaibel.
