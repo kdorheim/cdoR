@@ -15,9 +15,6 @@ testthat::test_that('check_cmip_info', {
                                          ensemble = 'package',
                                          grid = 'gn')
 
-  # Check to see if it throws an error.
-  testthat::expect_error(check_cmip_info(as.data.frame(data)), 'dt must be a tibble object.')
-
 
   # When only one kind of CMIP data is read the function
   # should return true but if multiple types of data are read in then
