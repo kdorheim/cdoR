@@ -71,7 +71,6 @@ if(file.exists(cdoR::cdo_exe)){
 
   })
 
-
   testthat::test_that('fldmean works', {
 
     # Calculate the weighted means with the different area weights, then compare temperature.
@@ -87,7 +86,43 @@ if(file.exists(cdoR::cdo_exe)){
 
   })
 
+
+  testthat::test_that('cdo_sellonlat_fldmean works', {
+
+    latlon_df <- tibble::tibble(name = c('global', 'NH'),
+                   lon1 = c(0, 0),
+                   lon2 = c(360, 360),
+                   lat1 = c(-90, 0),
+                   lat2 = c(90, 90))
+
+
+   out <- cdo_sellonlat_fldmean(basename = 'test', info = info, in_nc = annual_nc, area_nc = land_area,
+                                latlon_df = latlon_df, intermed_dir = test_dir, cleanUP = FALSE)
+
+   # The global and NH temp should be different from one another and ther should be two areas returned.
+   area <- unique(out$area)
+   testthat::expect_equal(length(area), 2)
+
+   out %>%
+     dplyr::select(datetime, box, value) %>%
+     tidyr::spread(box, value) %>%
+     dplyr::mutate(dif = (global - NH)^2) %>%
+     dplyr::pull(dif) %>%
+     mean ->
+     mean_dif
+   testthat::expect_true(mean_dif != 0)
+
+  })
+
+
+
+
   file.remove(list.files(test_dir, pattern = '.nc'))
+
+
+
+
+
 
 
 } else {
