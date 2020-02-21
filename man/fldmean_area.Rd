@@ -4,7 +4,7 @@
 \alias{fldmean_area}
 \title{Calculate the area weighted field mean without using cdo.}
 \usage{
-fldmean_area(info, in_nc, area_nc)
+fldmean_area(info, in_nc, area_nc, showMessages = FALSE)
 }
 \arguments{
 \item{info}{The dataframe of CMIP information such as variable / ensemble / domain / ect.}
@@ -12,6 +12,8 @@ fldmean_area(info, in_nc, area_nc)
 \item{in_nc}{the path for the input netcdf file that is going to be procssed.}
 
 \item{area_nc}{the path for the area netcdf file that will be used as the area weights.}
+
+\item{showMessages}{default set to FALSE to hide messages}
 }
 \value{
 A tibble of the area weighted mean.

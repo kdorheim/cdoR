@@ -14,8 +14,8 @@
 #'
 #' @param dt A tibble object containg CMIP information.
 #' @return A true or false if the conditions are met.
+#' @export
 check_cmip_info <- function(dt){
-  assertthat::assert_that(tibble::is_tibble(dt), msg = 'dt must be a tibble object.')
   dt %>%
     dplyr::select(variable, domain, model, experiment, ensemble, grid) %>%
     dplyr::distinct(.) ->
@@ -32,13 +32,13 @@ check_cmip_info <- function(dt){
 #' @param dt A tibble containg CMIP information for a time series of monthly data.
 #' @return A data frame of monthly data with the problem column indicating if there is an issue with the number of
 #' months in the time series.
+#' @export
 check_12_months <- function(dt){
 
   # Check the data frame column names,
   required <- c('year', 'month', 'value', cdoR::cmip6_info)
   assertthat::assert_that(all(required %in% names(dt)), msg = 'Missing required column names.')
   assertthat::assert_that(check_cmip_info(dt), msg = 'Trying to process data from muliple MIP sources.')
-  assertthat::assert_that(tibble::is_tibble(dt), msg = 'dt must be a tibble.')
 
   dt %>%
     dplyr::group_by(year, variable, domain, model, experiment, ensemble, grid) %>%
@@ -108,6 +108,7 @@ check_annual_dupplicates <- function(dt){
 #' @param dt A tibble object containg CMIP information for a time series of annual data.
 #' @return A data frame of monthly data with the problem column indicating if there is an issue with the number of
 #' months in the time series.
+#' @export
 check_annual_continuous <- function(dt){
 
   required <- c('year', 'value', cmip6_info)
