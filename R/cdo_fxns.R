@@ -143,10 +143,11 @@ cdo_yearmonmean <- function(name, in_nc, intermed_dir){
 #' @param info The dataframe of CMIP information such as variable / ensemble / domain / ect.
 #' @param in_nc the path for the input netcdf file that is going to be procssed.
 #' @param area_nc the path for the area netcdf file that will be used as the area weights.
+#' @param area_var the string name of the area variable, typically set to the default "areacella" but could also be "areacello"
 #' @param showMessages default set to FALSE to hide messages
 #' @return A tibble of the area weighted mean.
 #' @export
-fldmean_area <- function(info, in_nc, area_nc, showMessages = FALSE){
+fldmean_area <- function(info, in_nc, area_nc, area_var = 'areacello', showMessages = FALSE){
 
   assertthat::assert_that(file.exists(area_nc))
   assertthat::assert_that(file.exists(in_nc))
@@ -156,7 +157,7 @@ fldmean_area <- function(info, in_nc, area_nc, showMessages = FALSE){
   time <- format_time(nc)
   data <- ncdf4::ncvar_get(nc, info$variable)
 
-  area <- ncdf4::ncvar_get(ncdf4::nc_open(area_nc), 'areacella')
+  area <- ncdf4::ncvar_get(ncdf4::nc_open(area_nc), area_var)
 
   mean <- apply(data, 3, weighted.mean, w = area)
 
