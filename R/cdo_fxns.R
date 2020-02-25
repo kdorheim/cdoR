@@ -147,7 +147,7 @@ cdo_yearmonmean <- function(name, in_nc, intermed_dir){
 #' @param showMessages default set to FALSE to hide messages
 #' @return A tibble of the area weighted mean.
 #' @export
-fldmean_area <- function(info, in_nc, area_nc, area_var = 'areacello', showMessages = FALSE){
+fldmean_area <- function(info, in_nc, area_nc, area_var = 'areacella', showMessages = FALSE){
 
   assertthat::assert_that(file.exists(area_nc))
   assertthat::assert_that(file.exists(in_nc))
