@@ -159,7 +159,7 @@ fldmean_area <- function(info, in_nc, area_nc, area_var = 'areacella', showMessa
 
   area <- ncdf4::ncvar_get(ncdf4::nc_open(area_nc), area_var)
 
-  mean <- apply(data, 3, weighted.mean, w = area)
+  mean <- apply(data, 3, weighted.mean, w = area, na.rm = TRUE)
 
   cbind(time,
         value = mean,
