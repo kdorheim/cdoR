@@ -77,40 +77,6 @@ cdo_ocean_area <- function(dt, intermed_dir){
 
 }
 
-#'
-#' #' Calculate the area weighted field mean.
-#' #'
-#' #' \code{cdo_fldmean_area} Calculate the area weighted field mean for some varaibel.
-#' #'
-#' #' @param name A string for the base name of the intermediate netcdf files that will
-#' #' be used to label the intermediate netcdf files.
-#' #' @param in_nc the path for the input netcdf file that is going to be procssed.
-#' #' @param area_nc the path for the area netcdf file that will be used as the area weights.
-#' #' @param intermed_dir the path of the directory where all of the intermediate netcdf
-#' #' files will be saved to.
-#' #' @param showMessages default set to FALSE so hide messages, if set to TRUE will print messages
-#' #' that may be helpful during the debugging process.
-#' #' @return A data.table of the weighted fldmean result
-#' cdo_fldmean_area <- function(name, in_nc, area_nc, intermed_dir, showMessages = FALSE){
-#'   # TODO there is some problem wtih the cmip6 and cdo compatbility
-#'   # the commands that worked on cmip5 netcdfs are no longer work. This
-#'   # is puzzeling and I wonder if using the copy function could some how
-#'   # overwrite whatever projections were there.
-#'   stop()
-#'   assertthat::assert_that(file.exists(area_nc))
-#'   assertthat::assert_that(dir.exists(intermed_dir))
-#'   areadata_nc <- file.path(intermed_dir, paste0(name, '-AreaData.nc'))
-#'   out_nc      <- file.path(intermed_dir, paste0(name, '-fldmean.nc'))
-#'   if(file.exists(areadata_nc)) file.remove(areadata_nc)
-#'   if(file.exists(out_nc)) file.remove(out_nc)
-#'
-#'   system2(cdoR::cdo_exe, args = c(paste0("setgridarea,", area_nc), in_nc, areadata_nc), stdout = TRUE, stderr = TRUE)
-#'   system2(cdoR::cdo_exe, args = c('fldmean,weights=TRUE', areadata_nc, out_nc), stdout = TRUE, stderr = TRUE)
-#'
-#'   assertthat::assert_that(file.exists(out_nc))
-#'   out_nc
-#' }
-
 #' Calculate the annual average weighted by days in a month
 #'
 #' \code{cdo_yearmonmean} Calculate the annual average weighted by the number of
@@ -164,7 +130,8 @@ fldmean_area <- function(info, in_nc, area_nc, area_var = 'areacella', showMessa
   cbind(time,
         value = mean,
         units = ncdf4::ncatt_get(nc, info$variable)$unit,
-        info)
+        info,
+        stringsAsFactors = FALSE)
 
 }
 
@@ -266,15 +233,16 @@ internal_cdo_sellonlat <- function(name, box_name, cdo_arg, nc_in, intermed_dir)
 #' @param latlon_df The dataframe of the lat and lon boundaries, it must include the following columns,
 #' name, lon1, lon2, lat1, and lat2.
 #' @param intermed_dir The name of the directory to store the intermediate
-#' @param cleanUP default set to TRUE to remove the intermediate netcdf files.
 #' @return A dataframe of the area weighted field mean at each lat and lon box.
 #' @importFrom foreach %do%
 #' @export
-cdo_sellonlat_fldmean <- function(basename, info, in_nc, area_nc, latlon_df, intermed_dir, cleanUP = TRUE){
+cdo_sellonlat_fldmean <- function(basename, info, in_nc, area_nc, latlon_df,
+                                  intermed_dir, showMessages = TRUE){
 
   # Convert if needed from the 0W to 360E and -90S to 90N lat/lon boundries
   # to the -180W to 180E and 0S to 190N lat/lon boundries.
   relevant_latlon <- internal_format_coord_input(file = in_nc, input = latlon_df)
+  if(showMessages) message('lat and lon converted to the relevant scale')
 
   # Format the cdo arguments for each lat/lon box to process.
   args <- mapply(FUN = internal_format_sellonlat_cdo_argument,
@@ -283,37 +251,38 @@ cdo_sellonlat_fldmean <- function(basename, info, in_nc, area_nc, latlon_df, int
                  lat1 = relevant_latlon$lat1,
                  lat2 = relevant_latlon$lat2)
   names(args) <- relevant_latlon$name
-
+  if(showMessages) message('lat and lon cdo arguments formatted')
   # For each of the lat/lon boxes select the data and calculate the area weighted average.
   # The result will be a concatnated data frame of the filed mean over all of the
   # lat/lon boxes.
-  foreach::foreach(index = seq_along(args), .combine = 'rbind') %do% {
 
-    # Select the cdo argument and box name.
-    box_name <- names(args)[[index]]
-    cdo_arg  <- args[[index]]
+  bind_rows(mapply(function(box_name, cdo_arg){
 
     # Select the relevant area and calcualte the total area.
-    box_area <- internal_cdo_sellonlat(name = 'Area', box_name = box_name, cdo_arg = cdo_arg, nc_in = area_nc, intermed_dir = intermed_dir)
+    box_area <- internal_cdo_sellonlat(name = 'Area',
+                                       box_name = box_name,
+                                       cdo_arg = cdo_arg,
+                                       nc_in = area_nc,
+                                       intermed_dir = intermed_dir)
     box_area_nc <- ncdf4::nc_open(box_area)
     total_area  <- sum(ncdf4::ncvar_get(box_area_nc, 'areacella'))
     area_units  <- ncdf4::ncatt_get(box_area_nc, 'areacella')$units
     ncdf4::nc_close(box_area_nc)
 
     # Select the relevant data and calculate the weighted feild mean area.
-    box_data <- internal_cdo_sellonlat(name = 'Data', box_name = box_name, cdo_arg = cdo_arg, nc_in = in_nc, intermed_dir = intermed_dir)
-    data <- fldmean_area(info = info, in_nc = box_data, area_nc = box_area, showMessages = FALSE)
+    box_data <- internal_cdo_sellonlat(name = 'Data', box_name = box_name,
+                                       cdo_arg = cdo_arg, nc_in = in_nc,
+                                       intermed_dir = intermed_dir)
 
-    # Clean up the intermediate nc files.
-    if(cleanUP){file.remove(box_data, box_area)}
+    area_mean <- fldmean_area(info = info, in_nc = in_nc, area_nc = area, showMessages = TRUE)
+    area_mean[['box']]        <- box_name
+    area_mean[['cdo_arg']]    <- cdo_arg
+    area_mean[['area']]       <- total_area
+    area_mean[['area_units']] <- area_units
 
-    # Add box information to the result data frame.
-    data[['box']]        <- box_name
-    data[['cdo_arg']]    <- cdo_arg
-    data[['area']]       <- total_area
-    data[['area_units']] <- area_units
-    data
-  }
+    return(area_mean)
+
+  }, box_name = names(args), cdo_arg = args, SIMPLIFY = FALSE))
 
 }
 
