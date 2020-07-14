@@ -270,11 +270,10 @@ cdo_sellonlat_fldmean <- function(basename, info, in_nc, area_nc, latlon_df,
     ncdf4::nc_close(box_area_nc)
 
     # Select the relevant data and calculate the weighted feild mean area.
-    box_data <- internal_cdo_sellonlat(name = 'Data', box_name = box_name,
-                                       cdo_arg = cdo_arg, nc_in = in_nc,
+    box_data <- internal_cdo_sellonlat(name = 'Data', box_name = box_name, cdo_arg = cdo_arg, nc_in = in_nc,
                                        intermed_dir = intermed_dir)
 
-    area_mean <- fldmean_area(info = info, in_nc = in_nc, area_nc = area, showMessages = TRUE)
+    area_mean <- fldmean_area(info = info, in_nc = box_data, area_nc = box_area, showMessages = TRUE)
     area_mean[['box']]        <- box_name
     area_mean[['cdo_arg']]    <- cdo_arg
     area_mean[['area']]       <- total_area
